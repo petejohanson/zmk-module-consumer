@@ -11,7 +11,7 @@
 
 / {
     chosen {
-        zmk,keymap = user_keymap;
+        zmk,keymap = &user_keymap;
     };
 
     user_keymap: keymap {
