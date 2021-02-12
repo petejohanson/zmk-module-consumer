@@ -1,0 +1,37 @@
+on: [push, pull_request, create, workflow_dispatch]
+
+name: Build
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: zmkfirmware/zmk-build-arm:2.4
+    name: Build Test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Cache west modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-zephyr-modules
+        with:
+          path: |
+            modules/
+            tools/
+            zephyr/
+            bootloader/
+            zmk/
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('manifest-dir/west.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
+      - name: Initialize workspace (west init)
+        run: west init -l config
+      - name: Update modules (west update)
+        run: west update
+      - name: Export Zephyr (west zephyr-export)
+        run: west zephyr-export
+      - name: West Build (xiao soloe)
+        run: cd config && west build -s ../zmk/app -b nrf52840_mdk -- -DSHIELD=mdk_trio -DDTC_OVERLAY_FILE=$(pwd)/mdk_trio.keymap
