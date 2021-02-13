@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          path: repo
       - name: Cache west modules
         uses: actions/cache@v2
         env:
@@ -28,10 +30,10 @@ jobs:
             ${{ runner.os }}-test-
             ${{ runner.os }}-
       - name: Initialize workspace (west init)
-        run: west init -l config
+        run: west init -l repo
       - name: Update modules (west update)
         run: west update
       - name: Export Zephyr (west zephyr-export)
         run: west zephyr-export
       - name: West Build (xiao soloe)
-        run: cd config && west build -s ../zmk/app -b nrf52840_mdk -- -DSHIELD=mdk_trio -DDTC_OVERLAY_FILE=$(pwd)/../mdk_trio.keymap
+        run: west build -s zmk/app -b nrf52840_mdk -- -DSHIELD=mdk_trio -DDTC_OVERLAY_FILE=$(pwd)/repo/mdk_trio.keymap
